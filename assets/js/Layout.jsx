@@ -1,5 +1,14 @@
 import React, { useEffect, useState } from "react"
 import { Link, usePage } from "@inertiajs/react"
+import { router } from "@inertiajs/react"
+
+router.on("error", (errorEvent) => {
+  // inertial uses a map for errors (plural)
+  // we use the map as a message holder so it's a single error
+  const { message } = errorEvent.detail?.errors
+
+  console.error(`message`, message)
+})
 
 export default function Layout({ children }) {
   const page = usePage()
