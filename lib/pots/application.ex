@@ -11,8 +11,7 @@ defmodule Pots.Application do
       PotsWeb.Telemetry,
       Pots.Repo,
       {Ecto.Migrator,
-        repos: Application.fetch_env!(:pots, :ecto_repos),
-        skip: skip_migrations?()},
+       repos: Application.fetch_env!(:pots, :ecto_repos), skip: skip_migrations?()},
       {DNSCluster, query: Application.get_env(:pots, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Pots.PubSub},
       # Start a worker by calling: Pots.Worker.start_link(arg)

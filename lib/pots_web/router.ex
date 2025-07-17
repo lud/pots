@@ -8,6 +8,7 @@ defmodule PotsWeb.Router do
     plug :put_root_layout, html: {PotsWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug Inertia.Plug
   end
 
   pipeline :api do
@@ -17,7 +18,7 @@ defmodule PotsWeb.Router do
   scope "/", PotsWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    get "/", LaboratoryController, :index
   end
 
   # Other scopes may use custom stacks.

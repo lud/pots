@@ -9,6 +9,7 @@ defmodule Pots.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
+      modkit: modkit(),
       deps: deps()
     ]
   end
@@ -32,6 +33,10 @@ defmodule Pots.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
+      # Inertia Stack
+      {:inertia, "~> 2.5.1"},
+
+      # Phoenix / Ecto stack
       {:phoenix, "~> 1.7.21"},
       {:phoenix_ecto, "~> 4.5"},
       {:ecto_sql, "~> 3.10"},
@@ -68,5 +73,9 @@ defmodule Pots.MixProject do
         "phx.digest"
       ]
     ]
+  end
+
+  defp modkit do
+    [mount: [{Pots, "lib/pots"}, {PotsWeb, "lib/pots_web", flavor: :phoenix}]]
   end
 end
