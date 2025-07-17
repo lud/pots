@@ -1,9 +1,10 @@
 defmodule Pots.Model do
-  @moduledoc false
-
-  import Ecto.Query, warn: false
+  alias Pots.Data
   alias Pots.Repo
   alias Pots.Model.Wealth
+  import Ecto.Query, warn: false
+
+  @moduledoc false
 
   def fetch_wealth!() do
     Repo.one!(
@@ -20,5 +21,24 @@ defmodule Pots.Model do
       end)
 
     new_amount
+  end
+
+  def buy_ingredient(id, amount) do
+    Repo.transact(fn ->
+      with {:ok, %{price: price}} <- Data.Ingredients.fetch(id),
+           :ok <- check_affordable(price, amount) do
+        {:ok, update_wealth!(-price * amount)}
+      end
+    end)
+  end
+
+  defp check_affordable(price, amount) do
+    true = Repo.in_transaction?()
+
+    if fetch_wealth!() >= price * amount do
+      :ok
+    else
+      {:error, :not_enough_wealth}
+    end
   end
 end

@@ -1,7 +1,18 @@
 import React from "react"
+import { router } from "@inertiajs/react"
 
 function formatPrice(cents) {
   return (cents / 100).toFixed(2)
+}
+
+// TODO we need to use regular ajax here so we do not add the called route into
+// the browser history
+function buyIngredient(id) {
+  router.post("/market/buy", {
+    type: "ingredient",
+    id,
+    amount: 1,
+  })
 }
 
 function Market(props) {
@@ -19,14 +30,20 @@ function Market(props) {
         </thead>
         <tbody>
           {props.ingredients.map((ing) => (
-            <tr>
+            <tr key={ing.id}>
               <td>{ing.name}</td>
               <td>{formatPrice(ing.price)}</td>
               <td>
-                <button>Buy</button>
+                <button
+                  className="btn btn-neutral"
+                  onClick={() => buyIngredient(ing.id)}
+                >
+                  Buy
+                </button>
               </td>
+
               <td>
-                <button>Sell</button>
+                <button className="btn btn-neutral">Sell</button>
               </td>
             </tr>
           ))}

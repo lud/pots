@@ -22,7 +22,8 @@ config :pots, PotsWeb.Endpoint,
   debug_errors: true,
   secret_key_base: "jI+iTUUGFHp5qNxUdmYEcA5bOgZ8Ar7GSB2DfhbwS07eh9tyC7AOKle3eiAoF0kt",
   watchers: [
-    esbuild: {Esbuild, :install_and_run, [:pots, ~w(--sourcemap=inline --watch)]}
+    esbuild: {Esbuild, :install_and_run, [:pots, ~w(--sourcemap=inline --watch)]},
+    tailwind: {Tailwind, :install_and_run, [:pots, ~w(--watch)]}
   ]
 
 # ## SSL Support
@@ -51,6 +52,7 @@ config :pots, PotsWeb.Endpoint,
 # Watch static and templates for browser reloading.
 config :pots, PotsWeb.Endpoint,
   live_reload: [
+    web_console_logger: true,
     patterns: [
       ~r"priv/static/(?!uploads/).*(js|css|png|jpeg|jpg|gif|svg)$",
       ~r"lib/pots_web/(controllers|live|components)/.*(ex|heex)$"
@@ -61,7 +63,7 @@ config :pots, PotsWeb.Endpoint,
 config :pots, dev_routes: true
 
 # Do not include metadata nor timestamps in development logs
-config :logger, :console, format: "[$level] $message\n"
+config :logger, :default_formatter, format: "[$level] $message\n"
 
 # Set a higher stacktrace during development. Avoid configuring such
 # in production as building large stacktraces may be expensive.

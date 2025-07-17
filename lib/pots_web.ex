@@ -38,9 +38,7 @@ defmodule PotsWeb do
 
   def controller do
     quote do
-      use Phoenix.Controller,
-        formats: [:html, :json],
-        layouts: [html: PotsWeb.Layouts]
+      use Phoenix.Controller, formats: [:html, :json]
 
       import Plug.Conn
       import Inertia.Controller
@@ -51,8 +49,7 @@ defmodule PotsWeb do
 
   def live_view do
     quote do
-      use Phoenix.LiveView,
-        layout: {PotsWeb.Layouts, :app}
+      use Phoenix.LiveView
 
       unquote(html_helpers())
     end
@@ -90,6 +87,7 @@ defmodule PotsWeb do
 
       # Shortcut for generating JS commands
       alias Phoenix.LiveView.JS
+      alias PotsWeb.Layouts
 
       # Routes generation with the ~p sigil
       unquote(verified_routes())

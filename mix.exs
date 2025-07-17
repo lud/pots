@@ -10,7 +10,8 @@ defmodule Pots.MixProject do
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       modkit: modkit(),
-      deps: deps()
+      deps: deps(),
+      listeners: [Phoenix.CodeReloader]
     ]
   end
 
@@ -37,7 +38,7 @@ defmodule Pots.MixProject do
       {:inertia, "~> 2.5.1"},
 
       # Phoenix / Ecto stack
-      {:phoenix, "~> 1.7.21"},
+      {:phoenix, "~> 1.8.0-rc.4"},
       {:phoenix_ecto, "~> 4.5"},
       {:ecto_sql, "~> 3.10"},
       {:ecto_sqlite3, ">= 0.0.0"},
@@ -45,7 +46,8 @@ defmodule Pots.MixProject do
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:phoenix_live_view, "~> 1.0"},
       {:floki, ">= 0.30.0", only: :test},
-      {:esbuild, "~> 0.8", runtime: Mix.env() == :dev},
+      {:esbuild, "~> 0.10", runtime: Mix.env() == :dev},
+      {:tailwind, "~> 0.3", runtime: Mix.env() == :dev},
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},
       {:jason, "~> 1.2"},
@@ -70,10 +72,11 @@ defmodule Pots.MixProject do
       ],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
-      "assets.setup": ["esbuild.install --if-missing"],
-      "assets.build": ["esbuild pots"],
+      "assets.setup": ["esbuild.install --if-missing", "tailwind.install --if-missing"],
+      "assets.build": ["esbuild pots", "tailwind pots"],
       "assets.deploy": [
         "esbuild pots --minify",
+        "tailwind pots --minify",
         "phx.digest"
       ]
     ]

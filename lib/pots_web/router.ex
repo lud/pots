@@ -21,7 +21,11 @@ defmodule PotsWeb.Router do
     # Home page for dev, should redirect to another page
     get "/", MarketController, :index
 
-    get "/market", MarketController, :index
+    scope "/market" do
+      get "/", MarketController, :index
+      post "/buy", MarketController, :buy
+    end
+
     get "/laboratory", LaboratoryController, :index
   end
 

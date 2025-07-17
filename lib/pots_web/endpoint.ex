@@ -22,7 +22,7 @@ defmodule PotsWeb.Endpoint do
   plug Plug.Static,
     at: "/",
     from: :pots,
-    gzip: false,
+    gzip: not code_reloading?,
     only: PotsWeb.static_paths()
 
   # Code reloading can be explicitly enabled under the
