@@ -18,7 +18,11 @@ defmodule PotsWeb.Router do
   scope "/", PotsWeb do
     pipe_through :browser
 
-    get "/", LaboratoryController, :index
+    # Home page for dev, should redirect to another page
+    get "/", MarketController, :index
+
+    get "/market", MarketController, :index
+    get "/laboratory", LaboratoryController, :index
   end
 
   # Other scopes may use custom stacks.
