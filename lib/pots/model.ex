@@ -1,4 +1,5 @@
 defmodule Pots.Model do
+  alias Pots.Model.OwnedBooks
   alias Pots.Data
   alias Pots.Repo
   alias Pots.Model.KnownRecipe
@@ -33,10 +34,10 @@ defmodule Pots.Model do
   end
 
   def list_ingredient_stock() do
-    stocks = Repo.all(IngredientStock)
+     from(ing in IngredientStock, select: {ing.id, ing.amount})
+     |> Repo.all()
+     |> Map.new()
 
-    # Convert list of stocks to a map with id as key and amount as value
-    Enum.into(stocks, %{}, fn %{id: id, amount: amount} -> {id, amount} end)
   end
 
   def create_ingredient_stock(attrs) do
@@ -77,14 +78,14 @@ defmodule Pots.Model do
     end)
   end
 
-  defp check_affordable(price, amount) do
-    true = Repo.in_transaction?()
-
-    if fetch_wealth!() >= price * amount do
-      :ok
-    else
-      {:error, :not_enough_wealth}
-    end
+  # Returns only books that are affordable and not already known. If no one is
+  # affordable, returns the first not-known book in the list.
+  def available_books do
+    known = from(b in OwnedBooks, select: b.id)
+    unknown = Enum.filter(Pots.Data.Books.list(), fn %{id: id} -> id not in known end)
+    wealth = fetch_wealth!()
+    [first|others] = unknown
+    [first|Enum.filter(others, fn %{price: price} -> affordable?(wealth, price, 1) end)]
   end
 
   def buy_book(id) do
@@ -116,4 +117,22 @@ defmodule Pots.Model do
     |> KnownRecipe.changeset(attrs)
     |> Repo.insert()
   end
+
+
+  defp check_affordable(price, amount) do
+    true = Repo.in_transaction?()
+
+    if affordable?(fetch_wealth!(),price,amount) do
+      :ok
+    else
+      {:error, :not_enough_wealth}
+    end
+
+
+  end
+
+  defp affordable?(wealth,price,amount) do
+    wealth >= price * amount
+  end
+
 end

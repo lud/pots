@@ -5,7 +5,7 @@ defmodule PotsWeb.BookShopController do
 
   def index(conn, _params) do
     conn
-    |> assign_prop(:books, Data.Books.list())
+    |> assign_prop(:books, Model.available_books())
     |> assign_prop(:known_recipes, Model.list_recipes())
     |> assign_prop(:wealth, Model.fetch_wealth!())
     |> render_inertia("BookShop")

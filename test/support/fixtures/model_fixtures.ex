@@ -27,4 +27,16 @@ defmodule Pots.ModelFixtures do
 
     known_recipe
   end
+
+  @doc """
+  Generate a owned_books.
+  """
+  def owned_books_fixture(attrs \\ %{}) do
+    {:ok, owned_books} =
+      attrs
+      |> Enum.into(%{})
+      |> Pots.Model.create_owned_books()
+
+    owned_books
+  end
 end

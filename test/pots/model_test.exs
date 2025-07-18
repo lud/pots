@@ -378,4 +378,57 @@ defmodule Pots.ModelTest do
       assert {:error, %Ecto.Changeset{}} = Model.create_known_recipe(@invalid_attrs)
     end
   end
+
+  describe "books" do
+    alias Pots.Model.OwnedBooks
+
+    import Pots.ModelFixtures
+
+    @invalid_attrs %{}
+
+    test "list_books/0 returns all books" do
+      owned_books = owned_books_fixture()
+      assert Model.list_books() == [owned_books]
+    end
+
+    test "get_owned_books!/1 returns the owned_books with given id" do
+      owned_books = owned_books_fixture()
+      assert Model.get_owned_books!(owned_books.id) == owned_books
+    end
+
+    test "create_owned_books/1 with valid data creates a owned_books" do
+      valid_attrs = %{}
+
+      assert {:ok, %OwnedBooks{} = owned_books} = Model.create_owned_books(valid_attrs)
+    end
+
+    test "create_owned_books/1 with invalid data returns error changeset" do
+      assert {:error, %Ecto.Changeset{}} = Model.create_owned_books(@invalid_attrs)
+    end
+
+    test "update_owned_books/2 with valid data updates the owned_books" do
+      owned_books = owned_books_fixture()
+      update_attrs = %{}
+
+      assert {:ok, %OwnedBooks{} = owned_books} =
+               Model.update_owned_books(owned_books, update_attrs)
+    end
+
+    test "update_owned_books/2 with invalid data returns error changeset" do
+      owned_books = owned_books_fixture()
+      assert {:error, %Ecto.Changeset{}} = Model.update_owned_books(owned_books, @invalid_attrs)
+      assert owned_books == Model.get_owned_books!(owned_books.id)
+    end
+
+    test "delete_owned_books/1 deletes the owned_books" do
+      owned_books = owned_books_fixture()
+      assert {:ok, %OwnedBooks{}} = Model.delete_owned_books(owned_books)
+      assert_raise Ecto.NoResultsError, fn -> Model.get_owned_books!(owned_books.id) end
+    end
+
+    test "change_owned_books/1 returns a owned_books changeset" do
+      owned_books = owned_books_fixture()
+      assert %Ecto.Changeset{} = Model.change_owned_books(owned_books)
+    end
+  end
 end
