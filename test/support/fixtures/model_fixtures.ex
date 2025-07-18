@@ -10,4 +10,21 @@ defmodule Pots.ModelFixtures do
 
     ingredient_stock
   end
+
+  @doc """
+  Generate a known_recipe.
+  """
+  def known_recipe_fixture(attrs \\ %{}) do
+    {:ok, known_recipe} =
+      attrs
+      |> Enum.into(%{
+        components: [],
+        description: "some description",
+        name: "some name",
+        price: 42
+      })
+      |> Pots.Model.create_known_recipe()
+
+    known_recipe
+  end
 end

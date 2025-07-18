@@ -62,7 +62,7 @@ export default function Layout({ children }) {
         <Link href="/contact">Contact</Link> */}
         <span>{wealth.toFixed(2)} $</span>
       </header>
-      <div>{children}</div>
+      <div className="container m-auto">{children}</div>
     </main>
   )
 }

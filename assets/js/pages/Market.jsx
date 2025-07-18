@@ -16,33 +16,44 @@ function buyIngredient(id) {
   })
 }
 
+function formatIngredientStock(id, inventory) {
+  const stock = inventory[id]
+  if (typeof stock === "number") {
+    return stock.toString()
+  } else return ""
+}
+
 function Market(props) {
   console.log(`props`, props)
   return (
     <div>
-      <table className="table">
+      <table className="table table-sm">
         <thead>
           <tr>
             <th>Ingredient</th>
+            <th>Owned</th>
             <th>Price</th>
-            <th style={{ width: "200px" }}></th>
+            <th style={{ width: "110px" }}></th>
           </tr>
         </thead>
         <tbody>
           {props.ingredients.map((ing) => (
             <tr key={ing.id}>
               <td>{ing.name}</td>
+              <td>
+                {formatIngredientStock(ing.id, props.inventory_ingredients)}
+              </td>
               <td>{formatPrice(ing.price)}</td>
               <td>
                 <div className="flex">
                   <button
-                    className="btn btn-neutral"
+                    className="btn btn-neutral btn-xs"
                     onClick={() => buyIngredient(ing.id)}
                   >
                     Buy
                   </button>
 
-                  <button className="btn btn-neutral ml-2">Sell</button>
+                  <button className="btn btn-neutral btn-xs ml-2">Sell</button>
                 </div>
               </td>
             </tr>

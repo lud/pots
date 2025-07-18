@@ -6,6 +6,7 @@ defmodule PotsWeb.MarketController do
   def index(conn, _params) do
     conn
     |> assign_prop(:ingredients, Data.Ingredients.list())
+    |> assign_prop(:inventory_ingredients, Model.list_ingredient_stock())
     |> assign_prop(:wealth, Model.fetch_wealth!())
     |> render_inertia("Market")
   end
