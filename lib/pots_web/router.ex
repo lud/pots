@@ -26,6 +26,11 @@ defmodule PotsWeb.Router do
       post "/buy", MarketController, :buy
     end
 
+    scope "/bookshop" do
+      get "/", BookShopController, :index
+      post "/buy", BookShopController, :buy
+    end
+
     get "/laboratory", LaboratoryController, :index
   end
 

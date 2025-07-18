@@ -246,7 +246,8 @@ defmodule Pots.ModelTest do
 
       [tea_component] = tea_recipe.components
       assert tea_component.type == :ingredient
-      assert tea_component.id == 1  # Green Tea
+      # Green Tea
+      assert tea_component.id == 1
       assert tea_component.amount == 1
 
       # Verify recipe contents for Mint Tea
@@ -261,7 +262,8 @@ defmodule Pots.ModelTest do
       book_id = 2
 
       # Start with less wealth than required
-      Model.update_wealth!(-50)  # Reduce wealth to 50
+      # Reduce wealth to 50
+      Model.update_wealth!(-50)
 
       initial_wealth = Model.fetch_wealth!()
       assert initial_wealth == 50
@@ -322,7 +324,8 @@ defmodule Pots.ModelTest do
       # Buy second book (Faded Page of Scribbles - 0 recipes, costs 1000)
       assert {:ok, {_wealth2, recipes2}} = Model.buy_book(2)
       assert length(recipes2) == 0
-      assert length(Model.list_recipes()) == 2  # Still 2 recipes total
+      # Still 2 recipes total
+      assert length(Model.list_recipes()) == 2
 
       # Verify we have the expected recipes
       final_recipes = Model.list_recipes()
@@ -343,9 +346,9 @@ defmodule Pots.ModelTest do
       assert Model.list_recipes() == [known_recipe]
     end
 
-    test "get_known_recipe!/1 returns the known_recipe with given id" do
+    test "fetch_known_recipe!/1 returns the known_recipe with given id" do
       known_recipe = known_recipe_fixture()
-      assert Model.get_known_recipe!(known_recipe.id) == known_recipe
+      assert Model.fetch_known_recipe!(known_recipe.id) == known_recipe
     end
 
     test "create_known_recipe/1 with valid data creates a known_recipe" do

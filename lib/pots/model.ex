@@ -1,6 +1,7 @@
 defmodule Pots.Model do
   alias Pots.Data
   alias Pots.Repo
+  alias Pots.Model.KnownRecipe
   alias Pots.Model.Wealth
   alias Pots.Model.IngredientStock
   import Ecto.Query, warn: false
@@ -104,99 +105,15 @@ defmodule Pots.Model do
     end)
   end
 
-  alias Pots.Model.KnownRecipe
-
-  @doc """
-  Returns the list of recipes.
-
-  ## Examples
-
-      iex> list_recipes()
-      [%KnownRecipe{}, ...]
-
-  """
   def list_recipes do
     Repo.all(KnownRecipe)
   end
 
-  @doc """
-  Gets a single known_recipe.
+  def fetch_known_recipe!(id), do: Repo.get!(KnownRecipe, id)
 
-  Raises `Ecto.NoResultsError` if the Known recipe does not exist.
-
-  ## Examples
-
-      iex> get_known_recipe!(123)
-      %KnownRecipe{}
-
-      iex> get_known_recipe!(456)
-      ** (Ecto.NoResultsError)
-
-  """
-  def get_known_recipe!(id), do: Repo.get!(KnownRecipe, id)
-
-  @doc """
-  Creates a known_recipe.
-
-  ## Examples
-
-      iex> create_known_recipe(%{field: value})
-      {:ok, %KnownRecipe{}}
-
-      iex> create_known_recipe(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
   def create_known_recipe(attrs) do
     %KnownRecipe{}
     |> KnownRecipe.changeset(attrs)
     |> Repo.insert()
-  end
-
-  @doc """
-  Updates a known_recipe.
-
-  ## Examples
-
-      iex> update_known_recipe(known_recipe, %{field: new_value})
-      {:ok, %KnownRecipe{}}
-
-      iex> update_known_recipe(known_recipe, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def update_known_recipe(%KnownRecipe{} = known_recipe, attrs) do
-    known_recipe
-    |> KnownRecipe.changeset(attrs)
-    |> Repo.update()
-  end
-
-  @doc """
-  Deletes a known_recipe.
-
-  ## Examples
-
-      iex> delete_known_recipe(known_recipe)
-      {:ok, %KnownRecipe{}}
-
-      iex> delete_known_recipe(known_recipe)
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def delete_known_recipe(%KnownRecipe{} = known_recipe) do
-    Repo.delete(known_recipe)
-  end
-
-  @doc """
-  Returns an `%Ecto.Changeset{}` for tracking known_recipe changes.
-
-  ## Examples
-
-      iex> change_known_recipe(known_recipe)
-      %Ecto.Changeset{data: %KnownRecipe{}}
-
-  """
-  def change_known_recipe(%KnownRecipe{} = known_recipe, attrs \\ %{}) do
-    KnownRecipe.changeset(known_recipe, attrs)
   end
 end
