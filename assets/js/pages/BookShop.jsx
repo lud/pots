@@ -2,9 +2,6 @@ import React from "react"
 import { router } from "@inertiajs/react"
 import { formatPrice } from "../utils"
 
-// TODO we need to use regular ajax here so we do not add the called route into
-// the browser history. We should fetch() and router.reload() with preserve
-// scroll.
 function buyBook(id) {
   router.post("/bookshop/buy", {
     id,
@@ -23,18 +20,6 @@ function BookShop(props) {
         <p className="text-base opacity-70 mt-2">
           Discover new recipes by purchasing books
         </p>
-        <div className="stats stats-horizontal shadow mt-4">
-          <div className="stat">
-            <div className="stat-title">Your Wealth</div>
-            <div className="stat-value text-primary">
-              {formatPrice(props.wealth)}
-            </div>
-          </div>
-          <div className="stat">
-            <div className="stat-title">Known Recipes</div>
-            <div className="stat-value">{props.known_recipes.length}</div>
-          </div>
-        </div>
       </div>
 
       {props.books.length > 0 ? (
@@ -122,16 +107,9 @@ function BookShop(props) {
                       <p className="text-sm opacity-70 mb-2">
                         {recipe.description}
                       </p>
-                      <div className="text-sm mb-2">
-                        <span className="font-medium">Sells for:</span>{" "}
-                        <span className="font-mono text-success font-semibold">
-                          {formatPrice(recipe.price)}
-                        </span>
-                      </div>
-                      <div className="text-xs opacity-60">
-                        <span className="font-medium">
-                          Required ingredients:
-                        </span>
+
+                      <div className="text-xs">
+                        <span className="font-medium">Ingredients</span>
                         <ul className="list-disc list-inside mt-1 space-y-1">
                           {recipe.components.map((component, index) => (
                             <li key={index}>
@@ -139,6 +117,12 @@ function BookShop(props) {
                             </li>
                           ))}
                         </ul>
+                      </div>
+                      <div className="text-sm mt-2">
+                        <span className="font-medium">Sells for:</span>
+                        <span className="font-mono text-success-content font-semibold">
+                          {formatPrice(recipe.price)}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -152,19 +136,6 @@ function BookShop(props) {
       {props.known_recipes.length === 0 && props.books.length > 0 && (
         <div className="mt-8">
           <div className="alert alert-info">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              className="stroke-info shrink-0 w-6 h-6"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              ></path>
-            </svg>
             <div>
               <h4 className="font-bold">No recipes known yet</h4>
               <p>Purchase books above to learn new potion recipes!</p>

@@ -1,15 +1,15 @@
 defmodule Pots.Model do
-  alias Pots.Model.OwnedBook
   alias Pots.Data
-  alias Pots.Repo
-  alias Pots.Model.KnownRecipe
-  alias Pots.Model.Wealth
   alias Pots.Model.IngredientStock
+  alias Pots.Model.KnownRecipe
+  alias Pots.Model.OwnedBook
+  alias Pots.Model.Wealth
+  alias Pots.Repo
   import Ecto.Query, warn: false
 
   @moduledoc false
 
-  def fetch_wealth!() do
+  def fetch_wealth! do
     Repo.one!(
       from(w in Wealth, where: w.currency == ^Wealth.default_currency(), select: w.amount)
     )
@@ -44,7 +44,7 @@ defmodule Pots.Model do
     end
   end
 
-  def list_ingredient_stock() do
+  def list_ingredient_stock do
     from(ing in IngredientStock, select: {ing.id, ing.amount})
     |> Repo.all()
     |> Map.new()
@@ -79,10 +79,9 @@ defmodule Pots.Model do
 
   def buy_ingredient(id, amount) when amount > 0 do
     Repo.transact(fn ->
-      with {:ok, %{price: price}} <- Data.Ingredients.fetch(id) |> dbg(),
-           :ok <- check_affordable(price, amount) |> dbg() do
-            fetch_wealth!() |> dbg()
-        new_wealth = update_wealth!(-price * amount) |> dbg()
+      with {:ok, %{price: price}} <- Data.Ingredients.fetch(id),
+           :ok <- check_affordable(price, amount) do
+        new_wealth = update_wealth!(-price * amount)
         new_amount = update_ingredient_stock!(id, amount)
         {:ok, {new_wealth, new_amount}}
       end

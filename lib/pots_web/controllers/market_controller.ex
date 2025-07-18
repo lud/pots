@@ -1,6 +1,6 @@
 defmodule PotsWeb.MarketController do
-  alias Pots.Model
   alias Pots.Data
+  alias Pots.Model
   use PotsWeb, :controller
 
   def index(conn, _params) do

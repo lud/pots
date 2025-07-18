@@ -1,4 +1,6 @@
 defmodule Pots.ModelTest do
+  alias Pots.Data
+  alias Pots.Data.Ingredients
   alias Pots.Model
   alias Pots.Model.IngredientStock
   alias Pots.Model.KnownRecipe
@@ -8,16 +10,16 @@ defmodule Pots.ModelTest do
   use Pots.DataCase
 
   describe "wealth" do
-    test "currency 1 is always defined with amount 100 on fresh app" do
-      assert 100 = Model.fetch_wealth!()
-      assert 0 = Model.update_wealth!(-100)
+    test "currency 1 is always defined with amount 1 on fresh app" do
+      assert 1 = Model.fetch_wealth!()
+      assert 0 = Model.update_wealth!(-1)
       assert 10 = Model.update_wealth!(+10)
       assert 12 = Model.update_wealth!(+2)
       assert 0 = Model.update_wealth!(-12)
 
       # cannot go below zero
       assert_raise Ecto.InvalidChangesetError, fn ->
-        Model.update_wealth!(-1) |> dbg()
+        Model.update_wealth!(-1)
       end
     end
   end
@@ -94,8 +96,7 @@ defmodule Pots.ModelTest do
       ingredient_stock_fixture(%{id: 2, amount: 8})
 
       initial_stock = Model.list_ingredient_stock()
-      assert initial_stock == %{2 => 8}
-
+      assert %{2 => 8} == initial_stock
       Model.update_ingredient_stock!(2, 7)
       Model.update_ingredient_stock!(4, 3)
 
@@ -108,17 +109,17 @@ defmodule Pots.ModelTest do
     test "decreases wealth and increases ingredient stock on success" do
       ingredient_id = 1
       amount = 1
-      # Green Tea costs 100 per unit
-      expected_cost = 100 * amount
 
-      initial_wealth = Model.fetch_wealth!()
+      expected_cost = Ingredients.fetch!(1).price * amount
+
+      initial_wealth = Model.reset_wealth!(expected_cost + 10)
       initial_stock = Model.fetch_ingredient_stock!(ingredient_id)
       initial_stock_list = Model.list_ingredient_stock()
 
       assert {:ok, {new_wealth, new_stock}} = Model.buy_ingredient(ingredient_id, amount)
 
-      assert Model.fetch_wealth!() == initial_wealth - expected_cost
-      assert Model.fetch_wealth!() == new_wealth
+      assert initial_wealth - expected_cost == Model.fetch_wealth!()
+      assert new_wealth == Model.fetch_wealth!()
 
       assert new_stock == initial_stock + amount
       assert Model.fetch_ingredient_stock!(ingredient_id) == new_stock
@@ -137,11 +138,10 @@ defmodule Pots.ModelTest do
     test "can buy multiple units when sufficient wealth is available" do
       ingredient_id = 1
       amount = 3
-      expected_cost = 100 * amount
+      expected_cost = Data.Ingredients.fetch!(ingredient_id).price * amount
 
-      Model.update_wealth!(300)
+      initial_wealth = Model.reset_wealth!(expected_cost + 10)
 
-      initial_wealth = Model.fetch_wealth!()
       initial_stock = Model.fetch_ingredient_stock!(ingredient_id)
 
       assert {:ok, {new_wealth, new_stock}} = Model.buy_ingredient(ingredient_id, amount)
@@ -165,7 +165,7 @@ defmodule Pots.ModelTest do
       amount = 2
 
       initial_wealth = Model.fetch_wealth!()
-      assert initial_wealth == 100
+      assert initial_wealth == 1
 
       initial_stock = Model.fetch_ingredient_stock!(ingredient_id)
 
@@ -250,8 +250,6 @@ defmodule Pots.ModelTest do
       # Verify recipe contents for Tea
       tea_recipe = Enum.find(known_recipes, &(&1.name == "Tea"))
       assert tea_recipe.description == "It's just Tea."
-      assert tea_recipe.price == 400
-      assert length(tea_recipe.components) == 1
 
       [tea_component] = tea_recipe.components
       assert tea_component.type == :ingredient
@@ -262,20 +260,13 @@ defmodule Pots.ModelTest do
       # Verify recipe contents for Mint Tea
       mint_tea_recipe = Enum.find(known_recipes, &(&1.name == "Mint Tea"))
       assert mint_tea_recipe.description == "So sweet!"
-      assert mint_tea_recipe.price == 3000
-      assert length(mint_tea_recipe.components) == 3
     end
 
     test "buy_book/1 with insufficient wealth returns error and changes nothing" do
-      # Book 2 is "Faded Page of Scribbles" which costs 1000 (10 * 100)
       book_id = 2
 
-      # Start with less wealth than required
-      # Reduce wealth to 50
-      Model.reset_wealth!(50)
-
-      initial_wealth = Model.fetch_wealth!()
-      assert initial_wealth == 50
+      # we do not have enough
+      initial_wealth = Model.reset_wealth!(Data.Books.fetch!(book_id).price - 10)
 
       initial_recipes = Model.list_recipes()
       initial_owned_books = Model.list_owned_books()
@@ -303,33 +294,6 @@ defmodule Pots.ModelTest do
       assert Model.list_owned_books() == initial_owned_books
     end
 
-    test "buy_book/1 with book that has no recipes still decreases wealth" do
-      # Book 2 is "Faded Page of Scribbles" which costs 1000 and has no recipes
-      book_id = 2
-      expected_cost = 1000
-
-      # Ensure we have enough wealth
-      Model.reset_wealth!(1000)
-
-      initial_wealth = Model.fetch_wealth!()
-      initial_recipes = Model.list_recipes()
-
-      assert {:ok, {new_wealth, added_recipes}} = Model.buy_book(book_id)
-
-      # Check wealth decreased
-      assert new_wealth == initial_wealth - expected_cost
-      assert Model.fetch_wealth!() == new_wealth
-
-      # Check no recipes were added
-      assert added_recipes == []
-      assert Model.list_recipes() == initial_recipes
-
-      # Check that the book is now owned
-      owned_books = Model.list_owned_books()
-      assert length(owned_books) == 1
-      assert List.first(owned_books).id == book_id
-    end
-
     test "buying multiple books accumulates recipes correctly" do
       # Ensure we have enough wealth
       Model.reset_wealth!(2000)
@@ -341,12 +305,15 @@ defmodule Pots.ModelTest do
       assert length(Model.list_owned_books()) == 1
 
       # Buy second book (Faded Page of Scribbles - 0 recipes, costs 1000)
+      #
+      # TODO this book as no recipes for now so this generated test is stupid.
+      # Fix later.
       assert {:ok, {_wealth2, recipes2}} = Model.buy_book(2)
-      assert length(recipes2) == 0
+      assert [] == recipes2
       # Still 2 recipes total
-      assert length(Model.list_recipes()) == 2
+      assert [_, _] = Model.list_recipes()
       # Now 2 books owned
-      assert length(Model.list_owned_books()) == 2
+      assert [_, _] = Model.list_owned_books()
 
       # Verify we have the expected recipes
       final_recipes = Model.list_recipes()

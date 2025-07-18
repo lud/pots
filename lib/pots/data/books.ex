@@ -5,12 +5,12 @@ defmodule Pots.Data.Books do
   @books [
            %{
              name: "Torn Shopping List",
-             price: price(0),
+             price: 0,
              recipes: [
                %{
                  name: "Tea",
                  description: "It's just Tea.",
-                 price: price(4),
+                 price: 4,
                  components: [
                    ing("Green Tea", 1)
                  ]
@@ -18,7 +18,7 @@ defmodule Pots.Data.Books do
                %{
                  name: "Mint Tea",
                  description: "So sweet!",
-                 price: price(30),
+                 price: 8,
                  components: [
                    ing("Green Tea", 1),
                    ing("Mint Sprig", 2),
@@ -27,16 +27,16 @@ defmodule Pots.Data.Books do
                }
              ]
            },
-           %{name: "Faded Page of Scribbles", price: price(10), recipes: []},
-           %{name: "Greasy Kitchen Note", price: price(20), recipes: []},
-           %{name: "Worn Pocket Almanac", price: price(30), recipes: []},
-           %{name: "Stained Apprentice Handbook", price: price(45), recipes: []},
-           %{name: "Leatherbound Recipe Journal", price: price(120), recipes: []},
-           %{name: "Embroidered Field Manual", price: price(160), recipes: []},
-           %{name: "Gilded Tome of Elixirs", price: price(210), recipes: []},
-           %{name: "Gilded Tome of Elixirs vol. II", price: price(210), recipes: []}
-           #  %{name: "Ancient Illuminated Manuscript", price: price(700), recipes: []},
-           #  %{name: "Mythic Scroll of Forgotten Brews", price: price(1000), recipes: []}
+           %{name: "Faded Page of Scribbles", price: 10, recipes: []},
+           %{name: "Greasy Kitchen Note", price: 20, recipes: []},
+           %{name: "Worn Pocket Almanac", price: 30, recipes: []},
+           %{name: "Stained Apprentice Handbook", price: 45, recipes: []},
+           %{name: "Leatherbound Recipe Journal", price: 120, recipes: []},
+           %{name: "Embroidered Field Manual", price: 160, recipes: []},
+           %{name: "Gilded Tome of Elixirs", price: 210, recipes: []},
+           %{name: "Gilded Tome of Elixirs vol. II", price: 210, recipes: []}
+           #  %{name: "Ancient Illuminated Manuscript", price: (700), recipes: []},
+           #  %{name: "Mythic Scroll of Forgotten Brews", price: (1000), recipes: []}
          ]
          |> Enum.with_index(1)
          |> Enum.map(fn {item, index} ->
@@ -79,4 +79,11 @@ defmodule Pots.Data.Books do
   end)
 
   def fetch(_), do: {:error, :not_found}
+
+  def fetch!(id) do
+    case fetch(id) do
+      {:ok, ing} -> ing
+      {:error, :not_found} -> raise ArgumentError, "unknown book id #{id}"
+    end
+  end
 end

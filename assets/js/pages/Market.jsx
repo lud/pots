@@ -2,9 +2,6 @@ import React from "react"
 import { router } from "@inertiajs/react"
 import { formatPrice } from "../utils"
 
-// TODO we need to use regular ajax here so we do not add the called route into
-// the browser history. We should fetch() and router.reload() with preserve
-// scroll.
 function buyIngredient(id) {
   router.post("/market/buy", {
     type: "ingredient",

@@ -53,7 +53,7 @@ defmodule PotsWeb.BookShopControllerTest do
     test "fails to buy book with insufficient wealth", %{conn: conn} do
       # Reduce wealth to very low amount
       # Leave only 10 wealth
-      Model.update_wealth!(-90)
+      Model.reset_wealth!(0)
 
       # Book 2 costs 1000, which is more than we have
       book_id = 2
