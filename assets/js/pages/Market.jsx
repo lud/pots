@@ -6,7 +6,8 @@ function formatPrice(cents) {
 }
 
 // TODO we need to use regular ajax here so we do not add the called route into
-// the browser history
+// the browser history. We should fetch() and router.reload() with preserve
+// scroll.
 function buyIngredient(id) {
   router.post("/market/buy", {
     type: "ingredient",
@@ -19,13 +20,12 @@ function Market(props) {
   console.log(`props`, props)
   return (
     <div>
-      <table>
+      <table className="table">
         <thead>
           <tr>
             <th>Ingredient</th>
             <th>Price</th>
-            <th></th>
-            <th></th>
+            <th style={{ width: "200px" }}></th>
           </tr>
         </thead>
         <tbody>
@@ -34,16 +34,16 @@ function Market(props) {
               <td>{ing.name}</td>
               <td>{formatPrice(ing.price)}</td>
               <td>
-                <button
-                  className="btn btn-neutral"
-                  onClick={() => buyIngredient(ing.id)}
-                >
-                  Buy
-                </button>
-              </td>
+                <div className="flex">
+                  <button
+                    className="btn btn-neutral"
+                    onClick={() => buyIngredient(ing.id)}
+                  >
+                    Buy
+                  </button>
 
-              <td>
-                <button className="btn btn-neutral">Sell</button>
+                  <button className="btn btn-neutral ml-2">Sell</button>
+                </div>
               </td>
             </tr>
           ))}
