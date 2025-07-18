@@ -15,12 +15,8 @@ defmodule PotsWeb.MarketController do
 
     conn =
       case Model.buy_ingredient(id, amount) do
-        {:ok, _} ->
-          conn
-
-        {:error, :not_enough_wealth} ->
-          conn
-          |> assign_errors(%{message: "not enough wealth"})
+        {:ok, _} -> conn
+        {:error, :not_enough_wealth} -> assign_errors(conn, %{message: "not enough wealth"})
       end
 
     redirect(conn, to: "/market")

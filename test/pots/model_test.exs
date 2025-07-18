@@ -70,4 +70,80 @@ defmodule Pots.ModelTest do
       end
     end
   end
+
+  describe "buy_ingredient/2" do
+    test "decreases wealth and increases ingredient stock on success" do
+      ingredient_id = 1
+      amount = 1
+      # Green Tea costs 100 per unit
+      expected_cost = 100 * amount
+
+      initial_wealth = Model.fetch_wealth!()
+      initial_stock = Model.fetch_ingredient_stock!(ingredient_id)
+
+      assert {:ok, {new_wealth, new_stock}} = Model.buy_ingredient(ingredient_id, amount)
+
+      # Check wealth decreased by correct amount
+      assert Model.fetch_wealth!() == initial_wealth - expected_cost
+      assert Model.fetch_wealth!() == new_wealth
+
+      # Check stock increased by correct amount
+      assert new_stock == initial_stock + amount
+      assert Model.fetch_ingredient_stock!(ingredient_id) == new_stock
+    end
+
+    test "can buy multiple units when sufficient wealth is available" do
+      ingredient_id = 1
+      amount = 3
+      # 300 total cost
+      expected_cost = 100 * amount
+
+      # Add enough wealth to afford the purchase
+      # Now we have 400 total wealth
+      Model.update_wealth!(300)
+
+      initial_wealth = Model.fetch_wealth!()
+      initial_stock = Model.fetch_ingredient_stock!(ingredient_id)
+
+      assert {:ok, {new_wealth, new_stock}} = Model.buy_ingredient(ingredient_id, amount)
+
+      # Check wealth decreased by correct amount
+      assert Model.fetch_wealth!() == initial_wealth - expected_cost
+      assert Model.fetch_wealth!() == new_wealth
+
+      # Check stock increased by correct amount
+      assert new_stock == initial_stock + amount
+      assert Model.fetch_ingredient_stock!(ingredient_id) == new_stock
+    end
+
+    test "returns error when not affordable" do
+      ingredient_id = 1
+      # 2 units at 100 each = 200, but we only have 100 wealth
+      amount = 2
+
+      # Ensure we have exactly 100 wealth (the default)
+      initial_wealth = Model.fetch_wealth!()
+      assert initial_wealth == 100
+
+      initial_stock = Model.fetch_ingredient_stock!(ingredient_id)
+
+      assert {:error, :not_enough_wealth} = Model.buy_ingredient(ingredient_id, amount)
+
+      # Check that nothing changed
+      assert Model.fetch_wealth!() == initial_wealth
+      assert Model.fetch_ingredient_stock!(ingredient_id) == initial_stock
+    end
+
+    test "returns error for non-existent ingredient" do
+      non_existent_id = 999
+      amount = 1
+
+      initial_wealth = Model.fetch_wealth!()
+
+      assert {:error, :not_found} = Model.buy_ingredient(non_existent_id, amount)
+
+      # Check that wealth didn't change
+      assert Model.fetch_wealth!() == initial_wealth
+    end
+  end
 end

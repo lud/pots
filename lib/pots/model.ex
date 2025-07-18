@@ -58,11 +58,13 @@ defmodule Pots.Model do
     new_amount
   end
 
-  def buy_ingredient(id, amount) do
+  def buy_ingredient(id, amount) when amount > 0 do
     Repo.transact(fn ->
       with {:ok, %{price: price}} <- Data.Ingredients.fetch(id),
            :ok <- check_affordable(price, amount) do
-        {:ok, update_wealth!(-price * amount)}
+        new_wealth = update_wealth!(-price * amount)
+        new_amount = update_ingredient_stock!(id, amount)
+        {:ok, {new_wealth, new_amount}}
       end
     end)
   end
