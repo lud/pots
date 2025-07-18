@@ -1,9 +1,6 @@
 import React from "react"
 import { router } from "@inertiajs/react"
-
-function formatPrice(cents) {
-  return (cents / 100).toFixed(2)
-}
+import { formatPrice } from "../utils"
 
 // TODO we need to use regular ajax here so we do not add the called route into
 // the browser history. We should fetch() and router.reload() with preserve
@@ -24,7 +21,7 @@ function formatIngredientStock(id, inventory) {
 }
 
 function Market(props) {
-  console.log(`props`, props)
+  const canAfford = (price) => props.wealth >= price
   return (
     <div>
       <table className="table table-sm">
@@ -32,8 +29,7 @@ function Market(props) {
           <tr>
             <th>Ingredient</th>
             <th>Owned</th>
-            <th>Price</th>
-            <th style={{ width: "110px" }}></th>
+            <th style={{ width: "110px", textAlign: "right" }}>Price</th>
           </tr>
         </thead>
         <tbody>
@@ -43,17 +39,18 @@ function Market(props) {
               <td>
                 {formatIngredientStock(ing.id, props.inventory_ingredients)}
               </td>
-              <td>{formatPrice(ing.price)}</td>
               <td>
-                <div className="flex">
+                <div className="flex gap-1 justify-end items-center">
+                  <span>{formatPrice(ing.price)}</span>
                   <button
-                    className="btn btn-neutral btn-xs"
+                    className={`btn btn-xs ${
+                      canAfford(ing.price) ? "btn-neutral" : "btn-disabled"
+                    }`}
                     onClick={() => buyIngredient(ing.id)}
+                    disabled={!canAfford(ing.price)}
                   >
                     Buy
                   </button>
-
-                  <button className="btn btn-neutral btn-xs ml-2">Sell</button>
                 </div>
               </td>
             </tr>

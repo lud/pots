@@ -2,6 +2,7 @@ defmodule Pots.Model.KnownRecipe do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @derive {Jason.Encoder, except: [:__meta__]}
   schema "recipes" do
     field :name, :string
     field :description, :string
@@ -29,3 +30,5 @@ defmodule Pots.Model.KnownRecipe do
     |> validate_required([:type, :id, :amount])
   end
 end
+
+require(Protocol).derive(Jason.Encoder, Pots.Model.KnownRecipe.Component)
