@@ -2,6 +2,7 @@ defmodule Pots.Model do
   alias Pots.Data
   alias Pots.Repo
   alias Pots.Model.Wealth
+  alias Pots.Model.IngredientStock
   import Ecto.Query, warn: false
 
   @moduledoc false

@@ -1,7 +1,8 @@
 defmodule Pots.ModelTest do
-  use Pots.DataCase
-
   alias Pots.Model
+  alias Pots.Model.IngredientStock
+  import Pots.ModelFixtures
+  use Pots.DataCase
 
   describe "wealth" do
     test "currency 1 is always defined with amount 100 on fresh app" do
@@ -16,5 +17,12 @@ defmodule Pots.ModelTest do
         Model.update_wealth!(-1) |> dbg()
       end
     end
+  end
+
+  describe "ingredients" do
+    test "calling fetch_ingredient_stock!/1 with any id returns zero if unknown"
+    test "calling fetch_ingredient_stock!/1 with a previously set stock returns that number"
+    test "calling update_ingredient_stock!/2 with id and amount updates the amount"
+    test "calling update_ingredient_stock!/2 leading to negative amount raises an error"
   end
 end
