@@ -18,7 +18,41 @@ defmodule Pots.Model do
       Repo.transaction(fn ->
         wealth = Repo.one!(from(w in Wealth, where: w.currency == ^Wealth.default_currency()))
         new_wealth = Wealth.changeset(wealth, %{amount: wealth.amount + increment})
-        Repo.update!(new_wealth).amount |> dbg()
+        Repo.update!(new_wealth).amount
+      end)
+
+    new_amount
+  end
+
+  def fetch_ingredient_stock!(id) do
+    case Repo.get(IngredientStock, id) do
+      nil -> 0
+      stock -> stock.amount
+    end
+  end
+
+  def create_ingredient_stock(attrs) do
+    %IngredientStock{}
+    |> IngredientStock.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  def update_ingredient_stock!(id, increment) do
+    {:ok, new_amount} =
+      Repo.transaction(fn ->
+        case Repo.get(IngredientStock, id) do
+          nil ->
+            %IngredientStock{id: id}
+            |> IngredientStock.changeset(%{amount: increment})
+            |> Repo.insert!()
+            |> Map.fetch!(:amount)
+
+          stock ->
+            %IngredientStock{id: id}
+            |> IngredientStock.changeset(%{amount: stock.amount + increment})
+            |> Repo.update!()
+            |> Map.fetch!(:amount)
+        end
       end)
 
     new_amount
