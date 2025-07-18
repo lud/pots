@@ -1,6 +1,8 @@
 defmodule Pots.ModelTest do
   alias Pots.Model
   alias Pots.Model.IngredientStock
+  alias Pots.Model.KnownRecipe
+  alias Pots.Model.OwnedBook
   alias Pots.Repo
   import Pots.ModelFixtures
   use Pots.DataCase
@@ -187,7 +189,7 @@ defmodule Pots.ModelTest do
 
     test "buying different ingredients updates the inventory list correctly" do
       # Start with lots of wealth to afford multiple purchases
-      Model.update_wealth!(999_999)
+      Model.reset_wealth!(999_999)
 
       assert %{} = Model.list_ingredient_stock()
 
@@ -219,7 +221,9 @@ defmodule Pots.ModelTest do
 
       initial_wealth = Model.fetch_wealth!()
       initial_recipes = Model.list_recipes()
+      initial_owned_books = Model.list_owned_books()
       assert initial_recipes == []
+      assert initial_owned_books == []
 
       assert {:ok, {new_wealth, added_recipes}} = Model.buy_book(book_id)
 
@@ -233,6 +237,11 @@ defmodule Pots.ModelTest do
       # Verify the added recipes are in the known recipes
       known_recipes = Model.list_recipes()
       assert length(known_recipes) == 2
+
+      # Check that the book is now owned
+      owned_books = Model.list_owned_books()
+      assert length(owned_books) == 1
+      assert List.first(owned_books).id == book_id
 
       # Check that the recipes match what we expect from the book
       recipe_names = Enum.map(known_recipes, & &1.name) |> Enum.sort()
@@ -263,18 +272,20 @@ defmodule Pots.ModelTest do
 
       # Start with less wealth than required
       # Reduce wealth to 50
-      Model.update_wealth!(-50)
+      Model.reset_wealth!(50)
 
       initial_wealth = Model.fetch_wealth!()
       assert initial_wealth == 50
 
       initial_recipes = Model.list_recipes()
+      initial_owned_books = Model.list_owned_books()
 
       assert {:error, :not_enough_wealth} = Model.buy_book(book_id)
 
       # Check that nothing changed
       assert Model.fetch_wealth!() == initial_wealth
       assert Model.list_recipes() == initial_recipes
+      assert Model.list_owned_books() == initial_owned_books
     end
 
     test "buy_book/1 with non-existent book returns error" do
@@ -282,12 +293,14 @@ defmodule Pots.ModelTest do
 
       initial_wealth = Model.fetch_wealth!()
       initial_recipes = Model.list_recipes()
+      initial_owned_books = Model.list_owned_books()
 
       assert {:error, :not_found} = Model.buy_book(non_existent_id)
 
       # Check that nothing changed
       assert Model.fetch_wealth!() == initial_wealth
       assert Model.list_recipes() == initial_recipes
+      assert Model.list_owned_books() == initial_owned_books
     end
 
     test "buy_book/1 with book that has no recipes still decreases wealth" do
@@ -296,7 +309,7 @@ defmodule Pots.ModelTest do
       expected_cost = 1000
 
       # Ensure we have enough wealth
-      Model.update_wealth!(1000)
+      Model.reset_wealth!(1000)
 
       initial_wealth = Model.fetch_wealth!()
       initial_recipes = Model.list_recipes()
@@ -310,35 +323,69 @@ defmodule Pots.ModelTest do
       # Check no recipes were added
       assert added_recipes == []
       assert Model.list_recipes() == initial_recipes
+
+      # Check that the book is now owned
+      owned_books = Model.list_owned_books()
+      assert length(owned_books) == 1
+      assert List.first(owned_books).id == book_id
     end
 
     test "buying multiple books accumulates recipes correctly" do
       # Ensure we have enough wealth
-      Model.update_wealth!(2000)
+      Model.reset_wealth!(2000)
 
       # Buy first book (Torn Shopping List - 2 recipes, costs 0)
       assert {:ok, {_wealth1, recipes1}} = Model.buy_book(1)
       assert length(recipes1) == 2
       assert length(Model.list_recipes()) == 2
+      assert length(Model.list_owned_books()) == 1
 
       # Buy second book (Faded Page of Scribbles - 0 recipes, costs 1000)
       assert {:ok, {_wealth2, recipes2}} = Model.buy_book(2)
       assert length(recipes2) == 0
       # Still 2 recipes total
       assert length(Model.list_recipes()) == 2
+      # Now 2 books owned
+      assert length(Model.list_owned_books()) == 2
 
       # Verify we have the expected recipes
       final_recipes = Model.list_recipes()
       recipe_names = Enum.map(final_recipes, & &1.name) |> Enum.sort()
       assert recipe_names == ["Mint Tea", "Tea"]
+
+      # Verify both books are owned
+      owned_book_ids = Enum.map(Model.list_owned_books(), & &1.id) |> Enum.sort()
+      assert owned_book_ids == [1, 2]
+    end
+
+    test "available_books/0 excludes owned books and prioritizes affordable ones" do
+      # Buy the first book (free)
+      assert {:ok, {_wealth, _recipes}} = Model.buy_book(1)
+
+      Model.reset_wealth!(0)
+
+      # Now available_books should exclude the owned book, and since we cannot
+      # afford anything it lists only the first unknown book.
+      assert [%{id: new_available_id}] = Model.available_books()
+      assert new_available_id != 1
+
+      # if we have a lot of money we can see more
+      Model.reset_wealth!(999_999)
+      assert [_, _, _ | _] = Model.available_books()
+    end
+
+    test "available_books/0 returns first unknown book even if not affordable" do
+      # Reduce wealth to very low amount
+      # Leave only 10 wealth
+      Model.reset_wealth!(0)
+
+      # Should still return at least one book (the first unknown one) even if we
+      # cannot afford it
+      assert [_] = Model.available_books()
     end
   end
 
   describe "recipes" do
-    alias Pots.Model.KnownRecipe
-
-    import Pots.ModelFixtures
-
     @invalid_attrs %{name: nil, description: nil, components: nil, price: nil}
 
     test "list_recipes/0 returns all recipes" do
@@ -380,55 +427,26 @@ defmodule Pots.ModelTest do
   end
 
   describe "books" do
-    alias Pots.Model.OwnedBooks
-
-    import Pots.ModelFixtures
-
     @invalid_attrs %{}
 
     test "list_books/0 returns all books" do
       owned_books = owned_books_fixture()
-      assert Model.list_books() == [owned_books]
+      assert Model.list_owned_books() == [owned_books]
     end
 
-    test "get_owned_books!/1 returns the owned_books with given id" do
+    test "fetch_owned_book!/1 returns the owned_books with given id" do
       owned_books = owned_books_fixture()
-      assert Model.get_owned_books!(owned_books.id) == owned_books
+      assert ^owned_books = Model.fetch_owned_book!(owned_books.id)
     end
 
-    test "create_owned_books/1 with valid data creates a owned_books" do
-      valid_attrs = %{}
+    test "create_owned_book/1 with valid data creates a owned_books" do
+      valid_attrs = %{id: 123}
 
-      assert {:ok, %OwnedBooks{} = owned_books} = Model.create_owned_books(valid_attrs)
+      assert {:ok, %OwnedBook{}} = Model.create_owned_book(valid_attrs)
     end
 
-    test "create_owned_books/1 with invalid data returns error changeset" do
-      assert {:error, %Ecto.Changeset{}} = Model.create_owned_books(@invalid_attrs)
-    end
-
-    test "update_owned_books/2 with valid data updates the owned_books" do
-      owned_books = owned_books_fixture()
-      update_attrs = %{}
-
-      assert {:ok, %OwnedBooks{} = owned_books} =
-               Model.update_owned_books(owned_books, update_attrs)
-    end
-
-    test "update_owned_books/2 with invalid data returns error changeset" do
-      owned_books = owned_books_fixture()
-      assert {:error, %Ecto.Changeset{}} = Model.update_owned_books(owned_books, @invalid_attrs)
-      assert owned_books == Model.get_owned_books!(owned_books.id)
-    end
-
-    test "delete_owned_books/1 deletes the owned_books" do
-      owned_books = owned_books_fixture()
-      assert {:ok, %OwnedBooks{}} = Model.delete_owned_books(owned_books)
-      assert_raise Ecto.NoResultsError, fn -> Model.get_owned_books!(owned_books.id) end
-    end
-
-    test "change_owned_books/1 returns a owned_books changeset" do
-      owned_books = owned_books_fixture()
-      assert %Ecto.Changeset{} = Model.change_owned_books(owned_books)
+    test "create_owned_book/1 with invalid data returns error changeset" do
+      assert {:error, %Ecto.Changeset{}} = Model.create_owned_book(@invalid_attrs)
     end
   end
 end

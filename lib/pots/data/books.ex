@@ -27,14 +27,14 @@ defmodule Pots.Data.Books do
                }
              ]
            },
-           %{name: "Faded Page of Scribbles", price: price(10), recipes: []}
-           #  %{name: "Greasy Kitchen Note", price: price(5), recipes: []},
-           #  %{name: "Worn Pocket Almanac", price: price(30), recipes: []},
-           #  %{name: "Stained Apprentice Handbook", price: price(45), recipes: []},
-           #  %{name: "Leatherbound Recipe Journal", price: price(120), recipes: []},
-           #  %{name: "Embroidered Field Manual", price: price(160), recipes: []},
-           #  %{name: "Gilded Tome of Elixirs", price: price(210), recipes: []},
-           #  %{name: "Gilded Tome of Elixirs vol. II", price: price(210), recipes: []},
+           %{name: "Faded Page of Scribbles", price: price(10), recipes: []},
+           %{name: "Greasy Kitchen Note", price: price(20), recipes: []},
+           %{name: "Worn Pocket Almanac", price: price(30), recipes: []},
+           %{name: "Stained Apprentice Handbook", price: price(45), recipes: []},
+           %{name: "Leatherbound Recipe Journal", price: price(120), recipes: []},
+           %{name: "Embroidered Field Manual", price: price(160), recipes: []},
+           %{name: "Gilded Tome of Elixirs", price: price(210), recipes: []},
+           %{name: "Gilded Tome of Elixirs vol. II", price: price(210), recipes: []}
            #  %{name: "Ancient Illuminated Manuscript", price: price(700), recipes: []},
            #  %{name: "Mythic Scroll of Forgotten Brews", price: price(1000), recipes: []}
          ]

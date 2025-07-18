@@ -1,4 +1,4 @@
-defmodule Pots.Model.OwnedBooks do
+defmodule Pots.Model.OwnedBook do
   use Ecto.Schema
   import Ecto.Changeset
 

@@ -34,8 +34,8 @@ defmodule Pots.ModelFixtures do
   def owned_books_fixture(attrs \\ %{}) do
     {:ok, owned_books} =
       attrs
-      |> Enum.into(%{})
-      |> Pots.Model.create_owned_books()
+      |> Enum.into(%{id: 1})
+      |> Pots.Model.create_owned_book()
 
     owned_books
   end

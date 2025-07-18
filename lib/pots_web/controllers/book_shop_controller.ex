@@ -1,6 +1,5 @@
 defmodule PotsWeb.BookShopController do
   alias Pots.Model
-  alias Pots.Data
   use PotsWeb, :controller
 
   def index(conn, _params) do
