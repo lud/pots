@@ -86,6 +86,24 @@ defmodule Pots.Model do
     end
   end
 
+  def buy_book(id) do
+    Repo.transact(fn ->
+      with {:ok, %{price: price, recipes: recipes}} <- Data.Books.fetch(id),
+           :ok <- check_affordable(price, 1) do
+        new_wealth = update_wealth!(-price)
+
+        # Add all recipes from the book to known recipes
+        added_recipes =
+          Enum.map(recipes, fn recipe ->
+            {:ok, known_recipe} = create_known_recipe(recipe)
+            known_recipe
+          end)
+
+        {:ok, {new_wealth, added_recipes}}
+      end
+    end)
+  end
+
   alias Pots.Model.KnownRecipe
 
   @doc """
