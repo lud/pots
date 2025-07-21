@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react"
 import { Link, usePage } from "@inertiajs/react"
 import { router } from "@inertiajs/react"
 import { Toaster, toast } from "react-hot-toast"
-import { formatPrice } from "./utils"
+import { formatPrice, usePropMemo } from "./utils"
 
 router.on("error", (errorEvent) => {
   // inertial uses a map for errors (plural)
@@ -29,30 +29,8 @@ router.on("error", (errorEvent) => {
 })
 
 export default function Layout({ children }) {
-  const page = usePage()
-  console.log(`pageProps`, page.props)
-  const [wealth, setWealth] = useState(0)
-
-  /**
-   * @typedef {Object} ToastData — documentation for isLoading
-   * @property {"error" | "success" | "info" | "warning"} level
-   * @property {string} message
-   */
-  /**
-   * @typedef {Function} LoadingStateSetter — documentation for setIsLoading
-   */
-  /**
-   * @type {[ToastData[], LoadingStateSetter]} Loading
-   */
-  const [toasts, setToasts] = useState([])
-
-  useEffect(() => {}, [])
-
-  useEffect(() => {
-    if (typeof page.props.wealth === "number") {
-      setWealth(page.props.wealth)
-    }
-  }, [page.props.wealth])
+  console.log(`pageProps`, usePage())
+  const wealth = usePropMemo("wealth", 0)
 
   return (
     <main>

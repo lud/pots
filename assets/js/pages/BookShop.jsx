@@ -119,7 +119,7 @@ function BookShop(props) {
                         </ul>
                       </div>
                       <div className="text-sm mt-2">
-                        <span className="font-medium">Sells for:</span>
+                        <span className="font-medium">Sells for: </span>
                         <span className="font-mono text-success-content font-semibold">
                           {formatPrice(recipe.price)}
                         </span>
